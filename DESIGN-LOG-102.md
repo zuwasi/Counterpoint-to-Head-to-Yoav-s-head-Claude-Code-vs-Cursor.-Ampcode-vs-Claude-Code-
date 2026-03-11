@@ -1,0 +1,210 @@
+# Nested Headfull Full-Stack Components
+
+## Background
+
+**Jay** (client-only): Headfull components use `makeJayComponent` — client-only, no slow/fast phases.
+
+**Jay-stack** (fullstack) has:
+
+- **Page-level** headfull/headless: `makeJayStackComponent` with slow, fast, interactive phases
+- **Nested headless**: key-based or instance-based (`<jay:contract-name>`) — full-stack, plugin-provided
+- **Nested headfull**: imported via `<script type="application/jay-headfull">`, used as `<jay:Item>` — today these use `makeJayComponent` (client-only)
+
+Nested headfull components today are always client-only: they receive props from the parent's ViewState but have no server-side rendering. Any page that uses nested headfull components gets full client rendering (or SSR falls back to client when headfull nesting causes issues).
+
+Design Log #11 envisioned "Server Components" (`Props -> Promise<ViewState>`) and "Pure Client" components. The headless system implements the server-component pattern for nested components; headfull nested components do not.
+
+## Problem
+
+We need **nested headfull full-stack components** — components that:
+
+1. Include their own UI (headfull = jay-html)
+2. Can render on the backend (slow and/or fast phases)
+3. Continue interactively on the client
+4. Can be reused across multiple pages (shared layout: header, footer, menu)
+
+**Example use case**: A site header shared across pages. Today:
+
+- Put header in every page.jay-html → duplication
+- Or use a layout page that wraps content → layout is full-stack, but if header has its own jay-html and needs slow/fast data (e.g. nav from CMS), we can't give it server phases
+
+**Current gap**: Nested headfull use `makeJayComponent`. There is no way to have a nested headfull component that is `makeJayStackComponent` with slow/fast phases.
+
+## Questions and Answers
+
+**Q: How does this differ from nested headless?**
+A: Headless has no UI — the parent provides the template. Headfull brings its own jay-html. A header/footer/menu has fixed UI; headfull full-stack fits that.
+
+**Q: Can a nested headfull full-stack component be in a plugin?**
+A: No. Packages are headless. Nested headfull FS are project-local only.
+
+**Q: Does this affect pages that only use client-only nested headfull?**
+A: No. Existing `makeJayComponent` nested headfull stay as-is. We add a new import/registration path for full-stack nested headfull.
+
+## Design
+
+### Component Types (Updated)
+
+**Scope**: Nested headfull FS are project-local only. Packages provide headless components.
+
+**Positioning**: Instance-based only. No key-based pattern — position on page is determined by where `<jay:Name>` appears in the template.
+
+### Import Format — Reuse `application/jay-headfull`
+
+No new script type. Use existing `application/jay-headfull` + add optional `contract` attribute:
+
+- **`contract` present** → full-stack nested headfull (makeJayStackComponent, slow/fast phases)
+- **`contract` absent** → client-only (makeJayComponent, current behavior)
+
+```html
+<script
+  type="application/jay-headfull"
+  src="./header"
+  contract="./header.jay-contract"
+  names="Header"
+>
+```
+
+**Attributes**:
+
+- `src` — local path to component implementation
+- `contract` — optional. Path to `.jay-contract` file. When present: full-stack; when absent: client-only
+- `names` — component export name
+
+**Note**: The nested component's jay-html will also import the contract (for types). That overlap is fine.
+
+### Data Flow
+
+```mermaid
+flowchart TB
+    subgraph Page["Page (makeJayStackComponent)"]
+        PS[slowRender]
+        PF[fastRender]
+        PI[interactive]
+    end
+
+    subgraph NestedHeadfull["Nested Headfull FS (makeJayStackComponent)"]
+        NS[slowRender]
+        NF[fastRender]
+        NI[interactive]
+    end
+
+    PS --> PageVS
+    PF --> PageVS
+    NS --> NestedVS
+    NF --> NestedVS
+
+    PageVS --> CombinedVS
+    NestedVS --> CombinedVS
+
+    CombinedVS --> SSR
+    PI --> Client
+    NI --> Client
+```
+
+### Page Parts and load-page-parts
+
+Today `load-page-parts` only considers:
+
+- Page component (from route)
+- Headless imports (from jay-html)
+
+**Change**:
+
+- Parse `application/jay-headfull` imports. If `contract` present: load as full-stack (makeJayStackComponent). If `contract` absent: client-only.
+- **Dev server warning**: When encountering headfull without `contract` (client-only) in a jay-stack page/headless context, emit a warning — developer may not realize they're not getting SSR for that component.
+
+### Slow Rendering — Merge Headfull Template Post-Slow
+
+**Best approach**: Merge the headfull template into the page after the slow phase. From that point, it works like a headless full-stack component.
+
+**Flow**:
+
+1. **Slow phase**: Page runs slow render; nested headfull FS components run their slow render per instance (with props from parent).
+2. **Post-slow merge**: Replace each `<jay:Header>` placeholder in the page's slow-rendered jay-html with the headfull's compiled template (with its slow ViewState baked in). Result: a single merged jay-html with the header's markup inlined at the correct position.
+3. **From then on**: Fast and interactive phases run on the merged template — same pipeline as headless instance-based. No special server-element composition needed.
+
+### Compiler Changes
+
+1. **Parser**: Add optional `contract` attribute to `application/jay-headfull`. When present, treat as full-stack.
+2. **load-page-parts**: Handle headfull imports with `contract`; warn when headfull without contract in jay-stack context.
+3. **Slow-phase merge**: After slow render, merge headfull templates into page jay-html (replace `<jay:Name>` with expanded template + slow ViewState).
+
+## Implementation Plan
+
+### Phase 1: Import and Resolution
+
+1. Add optional `contract` attribute to `application/jay-headfull` parser.
+2. Extend `load-page-parts` to handle headfull with contract (full-stack); warn when headfull without contract in jay-stack.
+3. Per-instance: component runs phases with props from parent; add to parts for client composition.
+
+### Phase 2: Slow-Phase Merge
+
+1. After slow render: merge headfull templates into page jay-html at `<jay:Name>` positions.
+2. Headfull's slow ViewState is baked into the merged template.
+3. Result flows through existing fast/interactive pipeline (like headless).
+4. SSR: merged template compiles to server element; no special nested composition.
+
+### Phase 3: Client Composition
+
+1. Merged template contributes to composite parts (same pattern as headless).
+2. Hydration: standard coordinate alignment.
+3. Test full flow: slow → merge → fast → SSR → hydrate → interactive.
+
+## Examples
+
+### ✅ Good: Shared header across pages (instance-based; position = where tag is)
+
+```html
+<script
+  type="application/jay-headfull"
+  src="../layout/header"
+  contract="../layout/header.jay-contract"
+  names="Header"
+>
+
+<jay:Header logoUrl="/logo.png" />
+{pageContent}
+```
+
+### ✅ Good: Footer with dynamic year
+
+```html
+<script
+  type="application/jay-headfull"
+  src="../layout/footer"
+  contract="../layout/footer.jay-contract"
+  names="Footer"
+>
+
+...
+<jay:Footer />
+```
+
+### ❌ No plugin/package support
+
+Nested headfull FS are project-local. Packages provide headless components only.
+
+### ❌ Avoid: Heavy nested headfull FS in large lists
+
+Prefer headless for high-cardinality lists; headfull FS adds per-instance server work.
+
+## Trade-offs
+
+**Decision**: Reuse `application/jay-headfull`; `contract` present = full-stack, absent = client-only.
+
+## Verification Criteria
+
+1. Nested headfull FS component can run slow and fast phases.
+2. SSR produces correct HTML for nested headfull FS (e.g. header with nav).
+3. Hydration attaches event handlers to nested headfull FS DOM.
+4. Shared header/footer used on multiple pages renders and hydrates correctly.
+5. Existing nested headfull (client-only) behavior is unchanged.
+
+## Related Design Logs
+
+- #11 — Server side rendering (Server Component vision)
+- #37 — Composite Component
+- #84 — Headless component props and repeater support
+- #94 — SSR streaming renderer
+- #72 — Skip client script for non-interactive components
