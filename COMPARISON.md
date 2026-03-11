@@ -61,14 +61,21 @@
 - **Claude Code**: _TBD_
 - **Ampcode**: _TBD_
 
-### The "Bulldozer vs Architect" Question
+### Autonomy & Independence
 - **Claude Code**: _TBD_
 - **Ampcode**: _TBD_
 
-## Final Verdict
+### When Things Go Wrong
+- **Claude Code**: _TBD_
+- **Ampcode**: _TBD_
+
+## Final Verdict: Who Wins?
+
+> The original article pre-labeled Claude Code as "The Bulldozer" and Cursor as "The Architect."
+> We make no such assumptions. The data decides the winner.
 
 _TBD after both runs complete_
 
-## Hybrid Workflow Recommendation
+## Practical Recommendation
 
-_Based on results — does the original article's "Senior-Junior Loop" recommendation hold when Ampcode replaces Cursor?_
+_Based on results — which tool should you reach for, and when?_

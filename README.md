@@ -1,11 +1,13 @@
-# Counterpoint: Ampcode vs Claude Code — Head-to-Head
+# 🥊 Ampcode vs Claude Code — Who Wins?
 
-## Reproducing Yoav Abrahami's AI Coding Agent Comparison
+## A Fair Head-to-Head on a Real-World Framework Task
 
 This repository is a **counterpoint study** to Yoav Abrahami's article:
 > [Head to head: Claude Code (Opus 4.6 / 1M) vs Cursor (Composer 1.5 / 200k)](https://medium.com/wix-engineering/head-to-head-claude-code-opus-4-6-1m-vs-cursor-composer-1-5-200k-f15c537428ea)
 
-**Instead of Cursor, we test Ampcode** against Claude Code using the **identical task, methodology, and evaluation criteria**.
+**We replace Cursor with Ampcode** and pit it against Claude Code on the **identical task, methodology, and evaluation criteria**.
+
+> ⚠️ **No pre-assigned roles.** The original article labeled Claude Code "The Bulldozer" and Cursor "The Architect." We make **no assumptions** about which tool will play which role. Both tools compete on equal footing — the results speak for themselves. The goal is to find out **which one wins**, period.
 
 ---
 
@@ -97,6 +99,8 @@ Directly from Yoav's article — unchanged:
 | **Cursor → Ampcode** | This is the purpose of the study — to see how Ampcode compares to Claude Code on the same benchmark |
 
 Everything else is kept identical: same task, same design log, same prompt, same evaluation criteria, same scoring rubric, same methodology rules.
+
+> 📊 **For non-technical readers**: See [`PRESENTATION.html`](PRESENTATION.html) — a visual summary with short messages and images. No long articles required.
 
 ---
 
