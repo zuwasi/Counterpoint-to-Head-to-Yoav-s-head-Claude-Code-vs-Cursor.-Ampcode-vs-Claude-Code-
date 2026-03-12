@@ -302,13 +302,94 @@
   }
   .footer-line a { color: rgba(108,92,231,0.6); text-decoration: none; }
 
+  /* ── MOBILE RESPONSIVE ── */
   @media (max-width: 768px) {
-    .slide { padding: 40px 24px; }
-    .versus-row { grid-template-columns: 1fr; text-align: center; }
-    .versus-divider { transform: rotate(90deg); }
-    .nav-arrow { width: 44px; height: 44px; font-size: 1.1rem; }
-    .nav-arrow.left { left: 8px; }
-    .nav-arrow.right { right: 8px; }
+    html, body { overflow-x: hidden; }
+
+    .slide {
+      padding: 24px 18px;
+      justify-content: flex-start;
+      padding-top: 40px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .slide-content { max-width: 100%; }
+
+    /* Nav arrows smaller & tighter */
+    .nav-arrow { width: 40px; height: 40px; font-size: 1rem; }
+    .nav-arrow.left { left: 6px; }
+    .nav-arrow.right { right: 6px; }
+
+    /* Dots smaller */
+    .slide-counter { bottom: 10px; gap: 5px; }
+    .dot { width: 7px; height: 7px; }
+    .key-hint { display: none; }
+
+    /* Typography scale down */
+    h1 { font-size: clamp(1.6rem, 7vw, 2.4rem); margin-bottom: 14px; }
+    h2 { font-size: clamp(1.2rem, 5vw, 1.8rem); margin-bottom: 12px; }
+    h3 { font-size: 0.8rem; margin-bottom: 8px; }
+    .big-number { font-size: clamp(2.8rem, 12vw, 4.5rem); }
+    .subtitle { font-size: 0.9rem; }
+
+    /* Versus row → stack vertically */
+    .versus-row { grid-template-columns: 1fr; text-align: center; gap: 12px; }
+    .versus-divider { transform: none; font-size: 1.6rem; }
+    .contender { padding: 20px 16px; }
+    .contender .name { font-size: 1.3rem; }
+    .contender-amp { border-left: none; border-top: 4px solid var(--amp-color); }
+    .contender-claude { border-right: none; border-top: 4px solid var(--claude-color); }
+
+    /* Cards → single column */
+    .card-grid { grid-template-columns: 1fr !important; gap: 12px; margin-top: 16px; }
+    .card { padding: 18px; }
+    .card .emoji { font-size: 1.5rem; margin-bottom: 8px; }
+    .card h4 { font-size: 0.95rem; }
+    .card p { font-size: 0.8rem; }
+
+    /* Score table → compact */
+    .score-table { font-size: 0.75rem; margin-top: 12px; }
+    .score-table th { padding: 6px 8px; font-size: 0.6rem; }
+    .score-table td { padding: 10px 8px; font-size: 0.8rem; }
+    .score-cell { font-size: 0.95rem; min-width: 36px; }
+
+    /* Timeline */
+    .timeline { padding-left: 28px; margin: 16px 0; }
+    .timeline-item { padding: 12px 14px; margin-bottom: 14px; }
+    .timeline-item h4 { font-size: 0.85rem; }
+    .timeline-item p { font-size: 0.75rem; }
+
+    /* Quote */
+    .quote-block { padding: 16px 18px; font-size: 0.9rem; margin: 16px 0; }
+
+    /* Criteria grid */
+    .criteria-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .criteria-item { padding: 14px 8px; }
+    .criteria-item .emoji { font-size: 1.3rem; }
+    .criteria-item .label { font-size: 0.7rem; }
+
+    /* Tags */
+    .tag { padding: 4px 10px; font-size: 0.7rem; }
+
+    /* Divider */
+    .divider { margin: 20px auto; }
+
+    /* Footer */
+    .footer-line { font-size: 0.55rem; padding: 0 10px; white-space: normal; text-align: center; width: 90%; }
+
+    /* Hero image slide */
+    .slide img { border-radius: 10px !important; }
+  }
+
+  @media (max-width: 400px) {
+    .slide { padding: 16px 12px; padding-top: 32px; }
+    h1 { font-size: 1.4rem; }
+    h2 { font-size: 1.1rem; }
+    .big-number { font-size: 2.5rem; }
+    .criteria-grid { grid-template-columns: repeat(2, 1fr); }
+    .score-table th:nth-child(4), .score-table td:nth-child(4),
+    .score-table th:nth-child(5), .score-table td:nth-child(5) { display: none; }
   }
 </style>
 </head>
