@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥊 Ampcode vs Claude Code — Who Wins?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+  :root {
+    --amp-color: #6C5CE7;
+    --claude-color: #E17055;
+    --bg-dark: #0F0F1A;
+    --bg-card: #1A1A2E;
+    --bg-card-alt: #16213E;
+    --text-primary: #EAEAEA;
+    --text-secondary: #A0A0B8;
+    --accent-green: #00E676;
+    --accent-red: #FF5252;
+    --accent-gold: #FFD700;
+    --gradient-amp: linear-gradient(135deg, #6C5CE7, #a29bfe);
+    --gradient-claude: linear-gradient(135deg, #E17055, #fab1a0);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── SLIDE SYSTEM ── */
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(108,92,231,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(225,112,85,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .slide-content {
+    max-width: 1100px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+  }
+
+  .big-number {
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    max-width: 700px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .tag-amp { background: rgba(108,92,231,0.2); color: #a29bfe; border: 1px solid rgba(108,92,231,0.3); }
+  .tag-claude { background: rgba(225,112,85,0.2); color: #fab1a0; border: 1px solid rgba(225,112,85,0.3); }
+  .tag-vs { background: rgba(255,215,0,0.15); color: #FFD700; border: 1px solid rgba(255,215,0,0.3); }
+  .tag-pending { background: rgba(160,160,184,0.15); color: var(--text-secondary); border: 1px solid rgba(160,160,184,0.3); }
+
+  /* ── CARDS ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 32px;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  .card-amp { border-top: 3px solid var(--amp-color); }
+  .card-claude { border-top: 3px solid var(--claude-color); }
+
+  .card .emoji {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .card h4 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  /* ── VERSUS SECTION ── */
+  .versus-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 24px;
+    align-items: center;
+    margin: 20px 0;
+  }
+
+  .versus-divider {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent-gold);
+    text-shadow: 0 0 20px rgba(255,215,0,0.3);
+  }
+
+  .contender {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .contender-amp { border-left: 4px solid var(--amp-color); }
+  .contender-claude { border-right: 4px solid var(--claude-color); }
+
+  .contender .name {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+
+  .contender-amp .name { color: #a29bfe; }
+  .contender-claude .name { color: #fab1a0; }
+
+  .contender .detail {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  /* ── SCORE TABLE ── */
+  .score-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    margin-top: 24px;
+  }
+
+  .score-table th {
+    text-align: left;
+    padding: 12px 20px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+  }
+
+  .score-table td {
+    padding: 16px 20px;
+    background: var(--bg-card);
+    font-size: 1rem;
+  }
+
+  .score-table tr td:first-child { border-radius: 12px 0 0 12px; }
+  .score-table tr td:last-child { border-radius: 0 12px 12px 0; }
+
+  .score-cell {
+    font-weight: 700;
+    font-size: 1.3rem;
+    text-align: center;
+    min-width: 60px;
+  }
+
+  .score-cell.amp { color: #a29bfe; }
+  .score-cell.claude { color: #fab1a0; }
+  .score-cell.pending { color: var(--text-secondary); font-size: 1rem; }
+
+  /* ── TIMELINE ── */
+  .timeline {
+    position: relative;
+    margin: 40px 0;
+    padding-left: 40px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--amp-color), var(--claude-color));
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 32px;
+    padding: 20px 28px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -32px;
+    top: 28px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-gold);
+    border: 2px solid var(--bg-dark);
+  }
+
+  .timeline-item.done::before { background: var(--accent-green); }
+  .timeline-item.pending::before { background: var(--text-secondary); }
+
+  .timeline-item h4 { font-weight: 700; margin-bottom: 4px; }
+  .timeline-item p { color: var(--text-secondary); font-size: 0.9rem; }
+
+  /* ── QUOTE ── */
+  .quote-block {
+    background: var(--bg-card-alt);
+    border-left: 4px solid var(--accent-gold);
+    border-radius: 0 12px 12px 0;
+    padding: 28px 32px;
+    margin: 32px 0;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+
+  .quote-block .attribution {
+    font-style: normal;
+    font-size: 0.85rem;
+    margin-top: 12px;
+    color: var(--accent-gold);
+    font-weight: 600;
+  }
+
+  /* ── CRITERIA ICONS ── */
+  .criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .criteria-item {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .criteria-item .emoji { font-size: 2rem; margin-bottom: 8px; display: block; }
+  .criteria-item .label { font-weight: 600; font-size: 0.9rem; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 60px 40px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+
+  .footer a { color: var(--amp-color); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ── PENDING OVERLAY ── */
+  .pending-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,215,0,0.1);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-gold);
+    margin-bottom: 24px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--amp-color), var(--claude-color));
+    border-radius: 2px;
+    margin: 40px auto;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .slide { padding: 40px 20px; }
+    .versus-row { grid-template-columns: 1fr; text-align: center; }
+    .versus-divider { transform: rotate(90deg); }
+    .contender-amp { border-left: none; border-top: 4px solid var(--amp-color); }
+    .contender-claude { border-right: none; border-bottom: 4px solid var(--claude-color); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════ SLIDE 1: TITLE ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content" style="text-align: center;">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.25);border-radius:100px;padding:8px 20px;font-size:0.9rem;font-weight:600;color:var(--accent-green);margin-bottom:24px;">✅ Results are in!</div>
+    <h1>🥊 Ampcode vs Claude Code</h1>
+    <p class="subtitle" style="margin: 0 auto 32px;">
+      Two AI coding agents. One brutal task. Zero hand-holding.<br>
+      <strong>Who writes better code — and who panics first?</strong>
+    </p>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <span class="tag tag-amp">Ampcode</span>
+      <span class="tag tag-vs">VS</span>
+      <span class="tag tag-claude">Claude Code</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 2: WHY ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content">
+    <h3>The Backstory</h3>
+    <h2>Wix tested Claude Code vs Cursor.<br>We're testing Claude Code vs <span style="color:#a29bfe">Ampcode</span>.</h2>
+    <div class="quote-block">
+      "The hype around AI coding agents is loud, but for a developer, only three things matter: Who solves the problem fastest? Who writes the cleanest code? And who panics the least when things go sideways?"
+      <div class="attribution">— Yoav Abrahami, Wix Engineering</div>
+    </div>
+    <p class="subtitle">
+      We took the <strong>exact same benchmark</strong> from Yoav's article — same codebase, same task, same rules — and swapped Cursor for Ampcode. No pre-assigned winner. The code decides.
+    </p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 3: THE CONTENDERS ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content">
+    <h3>The Contenders</h3>
+    <h2>Meet the Fighters</h2>
+    <div class="versus-row">
+      <div class="contender contender-amp">
+        <div style="font-size: 4rem; margin-bottom: 16px;">⚡</div>
+        <div class="name">Ampcode</div>
+        <div class="detail">AI coding agent with tool access,<br>parallel execution, sub-agents</div>
+        <div style="margin-top: 16px;">
+          <span class="tag tag-amp">Challenger</span>
+        </div>
+      </div>
+      <div class="versus-divider">VS</div>
+      <div class="contender contender-claude">
+        <div style="font-size: 4rem; margin-bottom: 16px;">🧠</div>
+        <div class="name">Claude Code</div>
+        <div class="detail">Opus 4.6 · 1M context window<br>CLI-based autonomous agent</div>
+        <div style="margin-top: 16px;">
+          <span class="tag tag-claude">Defender</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 4: THE TASK ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content">
+    <h3>The Challenge</h3>
+    <h2>Not a toy problem.<br>A real framework-level change.</h2>
+    <div class="card-grid">
+      <div class="card">
+        <span class="emoji">🏗️</span>
+        <h4>The Jay Framework</h4>
+        <p>A real open-source web framework for designer-developer collaboration. TypeScript, SSR, hydration, compiler — the works.</p>
+      </div>
+      <div class="card">
+        <span class="emoji">📋</span>
+        <h4>Design Log #102</h4>
+        <p>Add nested headfull full-stack components: server-side rendering + client hydration + template merging across 3 phases.</p>
+      </div>
+      <div class="card">
+        <span class="emoji">🔒</span>
+        <h4>Strict Rules</h4>
+        <p>Design Log Methodology — read before write, design before implement, log every deviation, run tests after each phase.</p>
+      </div>
+      <div class="card">
+        <span class="emoji">🙅</span>
+        <h4>Minimum Human Help</h4>
+        <p>No hints. No suggestions. No redirects. The agent works alone. We only answer if it explicitly asks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 5: 3 PHASES ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content">
+    <h3>The 3 Phases</h3>
+    <h2>Each agent must complete all three.</h2>
+    <div class="timeline">
+      <div class="timeline-item pending">
+        <h4>Phase 1: Import & Resolution</h4>
+        <p>Parse headfull imports with contract attribute. Extend the parser, resolver, and page-parts loader. Handle edge cases like PascalCase names and type-only exports.</p>
+      </div>
+      <div class="timeline-item pending">
+        <h4>Phase 2: Slow-Phase Merge</h4>
+        <p>After server slow-render, merge headfull component templates into the page HTML. Bake in slow ViewState. Handle SSR compilation.</p>
+      </div>
+      <div class="timeline-item pending">
+        <h4>Phase 3: Client Composition & Hydration</h4>
+        <p>Wire up client-side interactivity. Ensure component constructors actually run. Handle refs, event handlers, and coordinate alignment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 6: SCORING ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content">
+    <h3>How We Score</h3>
+    <h2>6 criteria. 5 points each. Max 30.</h2>
+    <div class="criteria-grid">
+      <div class="criteria-item">
+        <span class="emoji">🗺️</span>
+        <div class="label">Planning</div>
+      </div>
+      <div class="criteria-item">
+        <span class="emoji">🧩</span>
+        <div class="label">Edge Cases</div>
+      </div>
+      <div class="criteria-item">
+        <span class="emoji">🐛</span>
+        <div class="label">Debugging</div>
+      </div>
+      <div class="criteria-item">
+        <span class="emoji">🧪</span>
+        <div class="label">Testing</div>
+      </div>
+      <div class="criteria-item">
+        <span class="emoji">🏛️</span>
+        <div class="label">Architecture</div>
+      </div>
+      <div class="criteria-item">
+        <span class="emoji">🔭</span>
+        <div class="label">Foresight</div>
+      </div>
+    </div>
+    <p class="subtitle" style="margin-top: 24px;">Same criteria used in the original Wix Engineering article. No changes.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 7: SCORECARD ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content">
+    <h3>The Scorecard</h3>
+    <h2>Results are in! 🏆</h2>
+    <table class="score-table">
+      <thead>
+        <tr>
+          <th>Criterion</th>
+          <th style="text-align:center;">Ampcode</th>
+          <th style="text-align:center;">Claude Code</th>
+          <th style="text-align:center;">Original Claude</th>
+          <th style="text-align:center;">Original Cursor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🗺️ Initial Planning</td>
+          <td class="score-cell amp">5</td>
+          <td class="score-cell claude">4</td>
+          <td class="score-cell" style="color:#888;">4</td>
+          <td class="score-cell" style="color:#888;">5</td>
+        </tr>
+        <tr>
+          <td>🧩 Edge Case Handling</td>
+          <td class="score-cell amp">4</td>
+          <td class="score-cell claude">4</td>
+          <td class="score-cell" style="color:#888;">4</td>
+          <td class="score-cell" style="color:#888;">5</td>
+        </tr>
+        <tr>
+          <td>🐛 Debugging & Iteration</td>
+          <td class="score-cell amp">5</td>
+          <td class="score-cell claude">3</td>
+          <td class="score-cell" style="color:#888;">3</td>
+          <td class="score-cell" style="color:#888;">5</td>
+        </tr>
+        <tr>
+          <td>🧪 Testing Discipline</td>
+          <td class="score-cell amp">4</td>
+          <td class="score-cell claude">4</td>
+          <td class="score-cell" style="color:#888;">3</td>
+          <td class="score-cell" style="color:#888;">5</td>
+        </tr>
+        <tr>
+          <td>🏛️ Architectural Awareness</td>
+          <td class="score-cell amp">5</td>
+          <td class="score-cell claude">3</td>
+          <td class="score-cell" style="color:#888;">2</td>
+          <td class="score-cell" style="color:#888;">5</td>
+        </tr>
+        <tr>
+          <td>🔭 Out-of-Scope Foresight</td>
+          <td class="score-cell amp">4</td>
+          <td class="score-cell claude">2</td>
+          <td class="score-cell" style="color:#888;">2</td>
+          <td class="score-cell" style="color:#888;">5</td>
+        </tr>
+        <tr style="font-weight: 700; font-size: 1.1rem;">
+          <td>⭐ TOTAL</td>
+          <td class="score-cell amp">27/30</td>
+          <td class="score-cell claude">20/30</td>
+          <td class="score-cell" style="color:#888;">18/30</td>
+          <td class="score-cell" style="color:#888;">30/30</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 16px; text-align: center;">
+      Gray columns = original article results (for reference). Colored columns = our results (pending).
+    </p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 8: COST & TIME ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content">
+    <h3>Time & Money</h3>
+    <h2>Speed and cost matter too.</h2>
+    <div class="card-grid">
+      <div class="card card-amp">
+        <h4 style="color: #a29bfe;">⚡ Ampcode</h4>
+        <div class="big-number" style="color: #a29bfe; margin: 16px 0;">13m</div>
+        <p>Total time: <strong>~13 minutes</strong></p>
+        <p>Tests passing: <strong>668</strong></p>
+        <p>Human interventions: <strong style="color: var(--accent-green);">0</strong></p>
+      </div>
+      <div class="card card-claude">
+        <h4 style="color: #fab1a0;">🧠 Claude Code</h4>
+        <div class="big-number" style="color: #fab1a0; margin: 16px 0;">30m+</div>
+        <p>Total time: <strong>~30+ minutes</strong></p>
+        <p>Tests passing: <strong>1,094</strong></p>
+        <p>Human interventions: <strong style="color: var(--accent-red);">Multiple</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 9: KEY QUESTION ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content" style="text-align: center;">
+    <h3>The Deciding Factor</h3>
+    <h2>Claude kept asking<br><span style="color: var(--accent-red);">"Shall I proceed?"</span><br>Amp just <span style="color: var(--accent-green);">did the work</span>.</h2>
+    <div class="divider"></div>
+    <p class="subtitle" style="margin: 0 auto;">
+      Under "minimum human intervention" rules, Claude Code's habit of asking for permission at every phase boundary became a liability. Ampcode completed all 3 phases with <strong>zero</strong> human interactions.<br><br>
+      <strong>Autonomy was the tie-breaker. Ampcode wins 27-20.</strong>
+    </p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 10: WHAT'S NEXT ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content" style="text-align: center;">
+    <h3>What Happened</h3>
+    <h2>Both finished. Here's the timeline.</h2>
+    <div class="timeline" style="max-width: 500px; margin: 40px auto;">
+      <div class="timeline-item done">
+        <h4>✅ Setup complete</h4>
+        <p>Runbooks, methodology, scoring criteria, repo structure</p>
+      </div>
+      <div class="timeline-item done">
+        <h4>✅ Claude Code run — ~30+ min</h4>
+        <p>All 3 phases done. 1,094 tests. Asked for human input multiple times. Hit 11% context.</p>
+      </div>
+      <div class="timeline-item done">
+        <h4>✅ Ampcode run — ~13 min</h4>
+        <p>All 3 phases done. 668 tests. Zero human interventions. Fully autonomous.</p>
+      </div>
+      <div class="timeline-item done">
+        <h4>✅ Scored & compared</h4>
+        <p>Ampcode 27/30 — Claude Code 20/30</p>
+      </div>
+    </div>
+    <a href="https://github.com/zuwasi/Counterpoint-to-Head-to-Yoav-s-head-Claude-Code-vs-Cursor.-Ampcode-vs-Claude-Code-"
+       style="display: inline-block; padding: 14px 32px; background: var(--gradient-amp); color: white; text-decoration: none; border-radius: 100px; font-weight: 700; font-size: 1rem; margin-top: 24px;">
+      View the Full Repo →
+    </a>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ SLIDE 11: WINNER ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="slide-content" style="text-align: center;">
+    <h3>The Verdict</h3>
+    <div class="big-number" style="color: var(--accent-gold); margin: 24px 0;">🏆</div>
+    <h2><span style="color:#a29bfe;">Ampcode</span> wins.</h2>
+    <h2 style="font-size: 1.5rem; color: var(--text-secondary); margin-top: 8px;">27 to 20. In half the time. With zero hand-holding.</h2>
+    <div class="divider"></div>
+    <p class="subtitle" style="margin: 0 auto;">
+      <strong>The takeaway:</strong> When you need an agent that can execute a plan autonomously from start to finish, Ampcode is the winner. Claude Code is thorough but needs you in the loop.
+    </p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ FOOTER ════════════════════════════════════════════ -->
+<div class="footer">
+  <p>
+    Based on <a href="https://medium.com/wix-engineering/head-to-head-claude-code-opus-4-6-1m-vs-cursor-composer-1-5-200k-f15c537428ea" target="_blank">Yoav Abrahami's original article</a> on Wix Engineering.<br>
+    Task: <a href="https://github.com/jay-framework/jay" target="_blank">Jay Framework</a> · 
+    Methodology: <a href="https://github.com/yoavaa/design-log-methodology" target="_blank">Design Log Methodology</a> ·
+    Results: <a href="https://github.com/zuwasi/Counterpoint-to-Head-to-Yoav-s-head-Claude-Code-vs-Cursor.-Ampcode-vs-Claude-Code-" target="_blank">GitHub Repo</a>
+  </p>
+</div>
+
+</body>
+</html>
